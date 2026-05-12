@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<title>Torpinventering</title>
+	<title>Historic settlement</title>
 
 	<!-- Bootstrap -->
 	<link rel="stylesheet"
@@ -13,6 +13,10 @@
 	<!-- Leaflet -->
 	<link rel="stylesheet"
 		  href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+	<!-- Bootstrap Icons -->
+	<link rel="stylesheet"
+		  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 	<!-- Framework CSS -->
 	<link rel="stylesheet" href="css/site.css">
@@ -23,7 +27,7 @@
 	<div class="container-fluid vh-100">
 		<div class="row h-100">
 
-			<!-- Karta -->
+			<!-- Map -->
 			<main class="col-9 p-0 position-relative">
 				<div id="map" class="w-100 h-100"></div>
 
@@ -37,10 +41,15 @@
 				</div>
 			</main>
 
-			<!-- Sidpanel -->
+			<!-- Side panel -->
 			<aside class="col-3 border-start p-3 overflow-auto">
 
-				<h1 id="title">Laddar...</h1>
+				<div class="d-flex justify-content-between align-items-center mb-3">
+					<h3 id="title">Laddar...</h3>
+					<button id="themeToggle" class="btn btn-sm btn-outline-secondary" title="Toggle dark mode">
+						<i class="bi bi-moon-fill"></i>
+					</button>
+				</div>
 
 				<div class="mb-3">
 					<input id="search"

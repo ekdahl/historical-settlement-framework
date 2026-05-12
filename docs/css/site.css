@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Fondamento:ital@0;1&display=swap');
+
+:root {
+	--bs-body-font-family: 'Fondamento', serif;
+}
+
+.leaflet-control-layers {
+	box-shadow: var(--bs-box-shadow);
+	background: var(--bs-body-bg);
+	border-radius: var(--bs-border-radius);
+	padding: 0.5rem;
+	opacity: 0.8;
+}
+
+.leaflet-container {
+	font-family: var(--bs-body-font-family);
+}

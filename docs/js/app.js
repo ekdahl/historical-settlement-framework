@@ -5,6 +5,9 @@ async function boot() {
   document.title = config.title;
   document.getElementById('title').textContent = config.title;
 
+  // Initialize theme toggle
+  initializeThemeToggle();
+
   await startApp(config);
 }
 
@@ -105,5 +108,34 @@ function createLayer(cfg) {
 
     default:
       throw new Error(`Unknown layer type: ${cfg.type}`);
+  }
+}
+
+function initializeThemeToggle() {
+  const themeToggle = document.getElementById('themeToggle');
+  const htmlElement = document.documentElement;
+
+  // Load saved theme or default to light
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  htmlElement.setAttribute('data-bs-theme', savedTheme);
+  updateThemeIcon(savedTheme);
+
+  // Toggle theme on button click
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = htmlElement.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+    htmlElement.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+}
+
+function updateThemeIcon(theme) {
+  const themeToggle = document.getElementById('themeToggle');
+  if (theme === 'dark') {
+    themeToggle.innerHTML = '<i class="bi bi-sun-fill"></i>';
+  } else {
+    themeToggle.innerHTML = '<i class="bi bi-moon-fill"></i>';
   }
 }
