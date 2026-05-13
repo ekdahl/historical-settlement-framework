@@ -38,13 +38,18 @@ velinga-torpinventering/
     places/
     maps/
 
+  build/       # eventuella filer från byggsteget
+
+  docs/        # publiceras som GitHub Pages
+    index.html
+    js/
+    css/
+    geojson/
+    tiles/
+
   config.json
 
   framework/   # git submodule -> historical-settlement-framework
-
-Publiceras via GitHub Pages från:
-
-/framework/docs
 
 URL blir då t.ex.:
 
@@ -126,7 +131,7 @@ GeoJSON
         ↓
 gdal2tiles
         ↓
-framework/docs/
+docs/
 
 GeoJSON används endast som leveransformat, inte som primär lagring.
 
