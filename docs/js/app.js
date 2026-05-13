@@ -1,14 +1,26 @@
 async function boot() {
-  const response = await fetch('../../config.json');
-  const config = await response.json();
+  // Wait for DOM to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+    return;
+  }
 
-  document.title = config.title;
-  document.getElementById('title').textContent = config.title;
+  try {
+    const response = await fetch('../../../config.json');
+    if (!response.ok) throw new Error(`Failed to fetch config: ${response.status}`);
+    const config = await response.json();
 
-  // Initialize theme toggle
-  initializeThemeToggle();
+    document.title = config.title;
+    document.getElementById('title').textContent = config.title;
 
-  await startApp(config);
+    // Initialize theme toggle
+    initializeThemeToggle();
+
+    await startApp(config);
+  } catch (error) {
+    console.error('Boot error:', error);
+    document.getElementById('title').textContent = 'Error: ' + error.message;
+  }
 }
 
 boot();
