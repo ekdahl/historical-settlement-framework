@@ -55,7 +55,7 @@ https://fredrikekdahl.github.io/velinga-torpinventering/
 ### Platser (torp/gårdar)
 
 En mapp per objekt:
-
+```
 data/
   places/
     backstugan/
@@ -63,8 +63,10 @@ data/
       text.md
       images/
         001.webp
+```
 
 metadata.json
+```json
 {
   "id": "backstugan",
   "namn": "Backstugan",
@@ -84,33 +86,38 @@ metadata.json
     }
   ]
 }
+```
 
 ### Giltiga `typ`
-torp
-gård
-soldattorp
-backstuga
-kvarn
-kyrka
+
+- torp
+- gård
+- soldattorp
+- backstuga
+- kvarn
+- kyrka
+- skola
 
 ### Historiska kartor
 
 En mapp per karta:
-
+```
 data/
   maps/
     laga_skifte_1827/
       source.json
       map.vrt
       gcps.json
+```
 
 Innehåller:
 
-original-URL till källa (t.ex. Lantmäteriet)
-VRT/GCP (icke-destruktiv georeferering)
-genererade tiles skapas i build-steget
+- original-URL till källa (t.ex. Lantmäteriet)
+- VRT/GCP (icke-destruktiv georeferering)
+- genererade tiles skapas i build-steget
 
 ## Build-pipeline
+
 metadata.json + text.md + kartor
         ↓
 validering
@@ -127,20 +134,21 @@ GeoJSON används endast som leveransformat, inte som primär lagring.
 
 ### Teknik
 
-Leaflet
-Bootstrap
-egen JS
+- Leaflet
+- Bootstrap
+- egen JS
 
 ### UI
 
-karta i mitten
-sidpanel för info/lager/sök
-tidsslider längst ned
+- karta i mitten
+- sidpanel för info/lager/sök
+- tidsslider längst ned
 
 ## Lagerkonfiguration (config.json)
 
 Alla kartlager definieras i data-repot:
 
+```json
 {
   "title": "Velinga torpinventering",
   "dataPath": "../../data",
@@ -170,6 +178,7 @@ Alla kartlager definieras i data-repot:
     }
   ]
 }
+```
 
 Alla lager behandlas som jämbördiga (ingen skillnad mellan "base" och "overlay").
 
