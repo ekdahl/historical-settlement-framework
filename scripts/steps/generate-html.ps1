@@ -6,7 +6,7 @@ param(
     [switch]$Verbose
 )
 
-$dataPlaces = Join-Path $repoRoot "data" "places"
+$dataPlaces = Join-Path (Join-Path $repoRoot "data") "places"
 $outputDir = Join-Path $repoRoot "build"
 
 if ($Verbose) {
@@ -27,4 +27,4 @@ if (-not (Test-Path $outputDir)) {
 
 # TODO: Implement Markdown to HTML conversion
 # Could use a tool like pandoc or a custom converter
-Write-Host "✓ Markdown to HTML conversion stub"
+Write-Host "[OK] Markdown to HTML conversion stub"

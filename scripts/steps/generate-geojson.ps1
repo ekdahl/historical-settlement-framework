@@ -6,7 +6,7 @@ param(
     [switch]$Verbose
 )
 
-$dataPlaces = Join-Path $repoRoot "data" "places"
+$dataPlaces = Join-Path (Join-Path $repoRoot "data") "places"
 $outputDir = Join-Path $repoRoot "build"
 
 if ($Verbose) {
@@ -26,4 +26,4 @@ if (-not (Test-Path $outputDir)) {
 }
 
 # TODO: Implement GeoJSON generation from metadata.json files
-Write-Host "✓ GeoJSON generation stub"
+Write-Host "[OK] GeoJSON generation stub"

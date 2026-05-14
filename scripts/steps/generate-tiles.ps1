@@ -6,8 +6,8 @@ param(
     [switch]$Verbose
 )
 
-$dataMaps = Join-Path $repoRoot "data" "maps"
-$outputDir = Join-Path $repoRoot "docs" "tiles"
+$dataMaps = Join-Path (Join-Path $repoRoot "data") "maps"
+$outputDir = Join-Path (Join-Path $repoRoot "docs") "tiles"
 
 if ($Verbose) {
     Write-Host "Generating map tiles..."
@@ -27,4 +27,4 @@ if (-not (Test-Path $outputDir)) {
 
 # TODO: Implement tile generation using gdal2tiles
 # Requirements: GDAL/gdal2tiles must be installed and available in PATH
-Write-Host "✓ Tile generation stub (requires gdal2tiles)"
+Write-Host "[OK] Tile generation stub (requires gdal2tiles)"
