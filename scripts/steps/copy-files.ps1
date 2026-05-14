@@ -26,3 +26,12 @@ if (Test-Path $targetDocs) {
 # Step 2: Copy framework docs to target
 Copy-Item -Path $frameworkDocs -Destination $targetDocs -Recurse -Force
 Write-Host "[OK] Copied framework/docs/ to docs/"
+
+# Step 3: Copy config.json to docs/
+$configSource = Join-Path $repoRoot "config.json"
+if (Test-Path $configSource) {
+    Copy-Item -Path $configSource -Destination (Join-Path $targetDocs "config.json") -Force
+    Write-Host "[OK] Copied config.json to docs/"
+} else {
+    Write-Host "[WARN] config.json not found at $configSource"
+}
