@@ -44,7 +44,7 @@ try {
     & (Join-Path $stepsDir "copy-files.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
     Write-Host ""
 
-    Write-Host "[OK] Build complete!"
+    Write-Host "✓ Build complete!"
 }
 catch {
     Write-Host "[ERROR] Build failed: $_" -ForegroundColor Red
