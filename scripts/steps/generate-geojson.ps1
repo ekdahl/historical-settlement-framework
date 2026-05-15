@@ -40,7 +40,7 @@ foreach ($placeFolder in $placeFolders) {
     
     if (Test-Path $metadataPath) {
         try {
-            $metadata = Get-Content -Path $metadataPath -Raw | ConvertFrom-Json
+            $metadata = Get-Content -Path $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
             
             # Process each location (places) in the place
             if ($metadata.places -and $metadata.places.Count -gt 0) {
