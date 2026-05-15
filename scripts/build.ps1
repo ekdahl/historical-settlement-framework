@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Get paths
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommandPath
+$scriptDir = $PSScriptRoot
 $stepsDir = Join-Path $scriptDir "steps"
 $repoRoot = Split-Path -Parent (Split-Path -Parent $scriptDir)
 
@@ -44,7 +44,7 @@ try {
     & (Join-Path $stepsDir "copy-files.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
     Write-Host ""
 
-    Write-Host "✓ Build complete!"
+    Write-Host "[OK] Build complete!"
 }
 catch {
     Write-Host "[ERROR] Build failed: $_" -ForegroundColor Red

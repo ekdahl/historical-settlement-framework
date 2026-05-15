@@ -27,7 +27,22 @@ if (Test-Path $targetDocs) {
 Copy-Item -Path $frameworkDocs -Destination $targetDocs -Recurse -Force
 Write-Host "[OK] Copied framework/docs/ to docs/"
 
-# Step 3: Copy config.json to docs/
+# Step 3: Copy generated GeoJSON to docs/
+$buildDir = Join-Path $repoRoot "build"
+$geojsonSource = Join-Path $buildDir "places.geojson"
+$geojsonDest = Join-Path $targetDocs "geojson"
+
+if (Test-Path $geojsonSource) {
+    if (-not (Test-Path $geojsonDest)) {
+        New-Item -ItemType Directory -Path $geojsonDest -Force | Out-Null
+    }
+    Copy-Item -Path $geojsonSource -Destination (Join-Path $geojsonDest "places.geojson") -Force
+    Write-Host "[OK] Copied places.geojson to docs/geojson/"
+} else {
+    Write-Host "[WARN] places.geojson not found in build/"
+}
+
+# Step 4: Copy config.json to docs/
 $configSource = Join-Path $repoRoot "config.json"
 if (Test-Path $configSource) {
     Copy-Item -Path $configSource -Destination (Join-Path $targetDocs "config.json") -Force
