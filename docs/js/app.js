@@ -68,7 +68,7 @@ async function startApp(config) {
   function getPlaceIcon(type) {
     const iconFile = placeIconMap[type] || 'house.svg';
     return L.icon({
-      iconUrl: new URL(`../img/map-markers/${iconFile}`, document.location).href,
+      iconUrl: new URL(`img/map-markers/${iconFile}`, document.location).href,
       iconSize: [32, 32],
       iconAnchor: [16, 32],
       popupAnchor: [0, -32]
