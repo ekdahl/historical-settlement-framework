@@ -31,7 +31,21 @@ try {
 
     # Step 2: Convert Markdown to HTML
     Write-Host "Step 2/4: Converting Markdown to HTML..."
-    & (Join-Path $stepsDir "generate-html.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
+    $python = $null
+    if (Get-Command py -ErrorAction SilentlyContinue) {
+        $python = "py"
+        $pythonArgs = @("-3")
+    } elseif (Get-Command python -ErrorAction SilentlyContinue) {
+        $python = "python"
+        $pythonArgs = @()
+    } else {
+        throw "Python 3 is required to run generate-html.py"
+    }
+
+    $htmlScript = Join-Path $stepsDir "generate-html.py"
+    $htmlArgs = @("--RepoRoot", $repoRoot.ToString())
+    if ($Verbose) { $htmlArgs += "--Verbose" }
+    & $python @pythonArgs $htmlScript @htmlArgs
     Write-Host ""
 
     # Step 3: Generate tiles

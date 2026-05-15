@@ -42,7 +42,18 @@ if (Test-Path $geojsonSource) {
     Write-Host "[WARN] places.geojson not found in build/"
 }
 
-# Step 4: Copy config.json to docs/
+# Step 4: Copy generated place HTML to docs/places/
+$generatedHtmlSource = Join-Path $buildDir "places"
+$generatedHtmlDest = Join-Path $targetDocs "places"
+
+if (Test-Path $generatedHtmlSource) {
+    Copy-Item -Path $generatedHtmlSource -Destination $generatedHtmlDest -Recurse -Force
+    Write-Host "[OK] Copied generated HTML to docs/places/"
+} else {
+    Write-Host "[WARN] build/places/ not found"
+}
+
+# Step 5: Copy config.json to docs/
 $configSource = Join-Path $repoRoot "config.json"
 if (Test-Path $configSource) {
     Copy-Item -Path $configSource -Destination (Join-Path $targetDocs "config.json") -Force
