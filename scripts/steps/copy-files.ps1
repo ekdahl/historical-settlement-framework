@@ -15,7 +15,7 @@ if ($Verbose) {
     Write-Host "  Target: $targetDocs"
 }
 
-# Step 1: Clear target docs directory
+# Clear target docs directory
 if (Test-Path $targetDocs) {
     Remove-Item -Path $targetDocs -Recurse -Force
     Write-Host "[OK] Cleared docs/"
@@ -23,11 +23,11 @@ if (Test-Path $targetDocs) {
     Write-Host "[INFO] docs/ directory does not exist yet"
 }
 
-# Step 2: Copy framework docs to target
+# Copy framework docs to target
 Copy-Item -Path $frameworkDocs -Destination $targetDocs -Recurse -Force
 Write-Host "[OK] Copied framework/docs/ to docs/"
 
-# Step 3: Copy generated GeoJSON to docs/
+# Copy generated GeoJSON to docs/
 $buildDir = Join-Path $repoRoot "build"
 $geojsonSource = Join-Path $buildDir "places.geojson"
 $geojsonDest = Join-Path $targetDocs "geojson"
@@ -42,7 +42,7 @@ if (Test-Path $geojsonSource) {
     Write-Host "[WARN] places.geojson not found in build/"
 }
 
-# Step 4: Copy generated place HTML to docs/places/
+# Copy generated place HTML to docs/places/
 $generatedHtmlSource = Join-Path $buildDir "places"
 $generatedHtmlDest = Join-Path $targetDocs "places"
 
@@ -53,7 +53,7 @@ if (Test-Path $generatedHtmlSource) {
     Write-Host "[WARN] build/places/ not found"
 }
 
-# Step 5: Copy config.json to docs/
+# Copy config.json to docs/
 $configSource = Join-Path $repoRoot "config.json"
 if (Test-Path $configSource) {
     Copy-Item -Path $configSource -Destination (Join-Path $targetDocs "config.json") -Force
@@ -61,3 +61,13 @@ if (Test-Path $configSource) {
 } else {
     Write-Host "[WARN] config.json not found at $configSource"
 }
+
+# Copy favicon.svg to docs/
+$faviconSource = Join-Path $repoRoot "favicon.svg"
+if (Test-Path $faviconSource) {
+    Copy-Item -Path $faviconSource -Destination (Join-Path $targetDocs "favicon.svg") -Force
+    Write-Host "[OK] Copied favicon.svg to docs/"
+} else {
+    Write-Host "[WARN] favicon.svg not found at $faviconSource"
+}
+
