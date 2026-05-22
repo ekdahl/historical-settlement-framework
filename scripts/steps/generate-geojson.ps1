@@ -56,6 +56,8 @@ foreach ($placeFolder in $placeFolders) {
                             name = $metadata.names[0]  # Use first name from array
                             type = $metadata.type
                             hasSign = $metadata.hasSign
+                            hasText = Test-Path (Join-Path $placeFolder.FullName "text.md")
+                            folder = $placeFolder.Name
                             from = $place.from
                             to = $place.to
                         }
