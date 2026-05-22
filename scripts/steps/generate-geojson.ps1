@@ -53,10 +53,11 @@ foreach ($placeFolder in $placeFolders) {
                         }
                         properties = @{
                             id = $metadata.id
-                            namn = $metadata.names[0]  # Use first name from array
-                            typ = $metadata.type
-                            fran = $place.from
-                            till = $place.to
+                            name = $metadata.names[0]  # Use first name from array
+                            type = $metadata.type
+                            hasSign = $metadata.hasSign
+                            from = $place.from
+                            to = $place.to
                         }
                     }
                     $geojson.features += $feature
