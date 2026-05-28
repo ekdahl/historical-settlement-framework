@@ -71,3 +71,11 @@ if (Test-Path $faviconSource) {
     Write-Host "[WARN] favicon.svg not found at $faviconSource"
 }
 
+# Copy style.css to docs/
+$styleSource = Join-Path $repoRoot "style.css"
+if (Test-Path $styleSource) {
+    Copy-Item -Path $styleSource -Destination (Join-Path $targetDocs "/css/style.css") -Force
+    Write-Host "[OK] Copied style.css to docs/css/"
+} else {
+    Write-Host "[WARN] style.css not found at $styleSource"
+}
