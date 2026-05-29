@@ -107,10 +107,12 @@ try {
     }
     
     $commandIndex = 1
+    $lastResolvedCommand = $null
     foreach ($command in $tileConfig.tileGenerationCommands) {
         $resolvedCommand = $command
         $resolvedCommand = $resolvedCommand.Replace("{{mapBuildDir}}", $mapBuildDir)
         $resolvedCommand = $resolvedCommand.Replace("{{generatedTilesFolder}}", $generatedTilesFolder)
+        $lastResolvedCommand = $resolvedCommand
 
         Write-Host "  Command $commandIndex/$($tileConfig.tileGenerationCommands.Count): $resolvedCommand"
         if ($Verbose) { Write-Host "    Working directory: $mapBuildDir" }
@@ -137,6 +139,35 @@ finally {
 # Stage tiles to build/tiles/
 Write-Host "Step 3/3: Staging tiles to build output directory..."
 $sourceTiles = Join-Path $mapBuildDir $generatedTilesFolder
+
+if (-not (Test-Path $sourceTiles) -and $lastResolvedCommand) {
+    # Fallback 1: infer output directory from last token in last executed command.
+    $lastToken = ($lastResolvedCommand.Trim() -split "\s+")[-1].Trim('"')
+    if ($lastToken -and -not $lastToken.StartsWith("-")) {
+        $candidate = if ([System.IO.Path]::IsPathRooted($lastToken)) {
+            $lastToken
+        } else {
+            Join-Path $mapBuildDir $lastToken
+        }
+        if (Test-Path $candidate) {
+            $sourceTiles = $candidate
+        }
+    }
+}
+
+if (-not (Test-Path $sourceTiles)) {
+    # Fallback 2: detect a tile-like directory (contains at least one numeric zoom folder).
+    $tileLikeDir = Get-ChildItem -Path $mapBuildDir -Directory -ErrorAction SilentlyContinue |
+        Where-Object {
+            @(Get-ChildItem -Path $_.FullName -Directory -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -match '^[0-9]+$' }).Count -gt 0
+        } |
+        Select-Object -First 1
+    if ($tileLikeDir) {
+        $sourceTiles = $tileLikeDir.FullName
+    }
+}
+
 if (Test-Path $sourceTiles) {
     # Remove existing staged tiles for this map and copy new ones
     if (Test-Path $mapTilesBuildDir) {
