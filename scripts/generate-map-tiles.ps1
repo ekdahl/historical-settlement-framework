@@ -19,7 +19,7 @@ $buildDir = Join-Path $repoRoot "build"
 $mapsDir = Join-Path $buildDir "maps"
 $tilesBuildDir = Join-Path $buildDir "tiles"
 
-$mapDataDir = Join-Path $dataDir "maps" $MapName
+$mapDataDir = Join-Path (Join-Path $dataDir "maps") $MapName
 $mapBuildDir = Join-Path $mapsDir $MapName
 $mapTilesBuildDir = Join-Path $tilesBuildDir $MapName
 
