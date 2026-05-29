@@ -1,5 +1,6 @@
 # Build script orchestrator for historical settlement framework
-# Coordinates the build pipeline: validation → GeoJSON → HTML → tiles → publish
+# Coordinates the build pipeline: validation → GeoJSON → HTML → publish
+# Note: Map tile generation is handled separately via generate-map-tiles.ps1
 
 param(
     [switch]$Verbose
@@ -25,12 +26,12 @@ Write-Host ""
 
 try {
     # Step 1: Generate GeoJSON
-    Write-Host "Step 1/4: Generating GeoJSON..."
+    Write-Host "Step 1/3: Generating GeoJSON..."
     & (Join-Path $stepsDir "generate-geojson.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
     Write-Host ""
 
     # Step 2: Convert Markdown to HTML
-    Write-Host "Step 2/4: Converting Markdown to HTML..."
+    Write-Host "Step 2/3: Converting Markdown to HTML..."
     $python = $null
     if (Get-Command py -ErrorAction SilentlyContinue) {
         $python = "py"
@@ -48,17 +49,15 @@ try {
     & $python @pythonArgs $htmlScript @htmlArgs
     Write-Host ""
 
-    # Step 3: Generate tiles
-    Write-Host "Step 3/4: Generating map tiles..."
-    & (Join-Path $stepsDir "generate-tiles.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
-    Write-Host ""
-
-    # Step 4: Copy files for publication
-    Write-Host "Step 4/4: Copying files to publication directory..."
+    # Step 3: Copy files for publication
+    Write-Host "Step 3/3: Copying files to publication directory..."
     & (Join-Path $stepsDir "copy-files.ps1") -RepoRoot $repoRoot -Verbose:$Verbose
     Write-Host ""
 
     Write-Host "[OK] Build complete!"
+    Write-Host ""
+    Write-Host "Note: Map tiles are generated separately using:"
+    Write-Host "  .\framework\scripts\generate-map-tiles.ps1"
 }
 catch {
     Write-Host "[ERROR] Build failed: $_" -ForegroundColor Red
