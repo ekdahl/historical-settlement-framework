@@ -1,11 +1,11 @@
 # Generate web tiles from historical map data
 # Standalone script for map tile generation (not part of main build pipeline)
 # Downloads source maps to build/maps/ (cached for reuse)
-# Generates web tiles to docs/tiles/map_name/
+# Stages generated web tiles to build/tiles/map_name/
 # Requires: GDAL tools (gdalbuildvrt, gdalwarp, gdal2tiles.py)
 
 param(
-    [string]$RepoRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
     [string]$MapName = "ekonomiska_kartan",
     [switch]$Force,  # Force re-download even if files exist
     [switch]$Verbose
@@ -17,12 +17,11 @@ $ErrorActionPreference = "Stop"
 $dataDir = Join-Path $repoRoot "data"
 $buildDir = Join-Path $repoRoot "build"
 $mapsDir = Join-Path $buildDir "maps"
-$docsDir = Join-Path $repoRoot "docs"
-$tilesDir = Join-Path $docsDir "tiles"
+$tilesBuildDir = Join-Path $buildDir "tiles"
 
 $mapDataDir = Join-Path $dataDir "maps" $MapName
 $mapBuildDir = Join-Path $mapsDir $MapName
-$mapTilesDir = Join-Path $tilesDir $MapName
+$mapTilesBuildDir = Join-Path $tilesBuildDir $MapName
 
 # Verify tile-build.json exists
 $tileConfigPath = Join-Path $mapDataDir "tile-build.json"
@@ -33,12 +32,20 @@ if (-not (Test-Path $tileConfigPath)) {
 
 $tileConfig = Get-Content -Path $tileConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
 
+# Folder (inside map build dir) where tileGenerationCommands write generated tiles.
+# Can be overridden per map in tile-build.json via "generatedTilesFolder".
+$generatedTilesFolder = "tiles"
+if ($tileConfig.PSObject.Properties.Name -contains "generatedTilesFolder" -and $tileConfig.generatedTilesFolder) {
+    $generatedTilesFolder = $tileConfig.generatedTilesFolder
+}
+
 if ($Verbose) {
     Write-Host "Map Tile Generation Configuration:"
     Write-Host "  Repository root: $repoRoot"
     Write-Host "  Map name: $MapName"
     Write-Host "  Build directory: $mapBuildDir"
-    Write-Host "  Output tiles: $mapTilesDir"
+    Write-Host "  Generated tiles folder: $generatedTilesFolder"
+    Write-Host "  Staged tiles: $mapTilesBuildDir"
     Write-Host "  Source files: $($tileConfig.sources.Count) files to download"
     Write-Host ""
 }
@@ -49,9 +56,9 @@ if (-not (Test-Path $mapBuildDir)) {
     if ($Verbose) { Write-Host "[OK] Created build directory: $mapBuildDir" }
 }
 
-if (-not (Test-Path $mapTilesDir)) {
-    New-Item -ItemType Directory -Path $mapTilesDir -Force | Out-Null
-    if ($Verbose) { Write-Host "[OK] Created tiles directory: $mapTilesDir" }
+if (-not (Test-Path $mapTilesBuildDir)) {
+    New-Item -ItemType Directory -Path $mapTilesBuildDir -Force | Out-Null
+    if ($Verbose) { Write-Host "[OK] Created tiles directory: $mapTilesBuildDir" }
 }
 
 # Download source files
@@ -90,43 +97,31 @@ if ($tifFiles.Count -eq 0) {
 
 if ($Verbose) { Write-Host "Found $($tifFiles.Count) .tif files to process" }
 
-# Build VRT (Virtual Dataset)
+# Execute tile generation commands
 Write-Host "Step 2/3: Processing with GDAL..."
 Push-Location $mapBuildDir
 
 try {
-    # Command 1: Build VRT from TIF files
-    Write-Host "  Building mosaic VRT..."
-    $cmd = "gdalbuildvrt"
-    $args = @("mosaic.vrt", "*.tif")
-    if ($Verbose) { Write-Host "    Running: $cmd $($args -join ' ')" }
-    
-    & $cmd @args
-    if ($LASTEXITCODE -ne 0) {
-        throw "gdalbuildvrt failed with exit code $LASTEXITCODE"
+    if (-not $tileConfig.tileGenerationCommands -or $tileConfig.tileGenerationCommands.Count -eq 0) {
+        throw "No tileGenerationCommands defined in tile-build.json"
     }
     
-    # Command 2: Reproject to Web Mercator (EPSG:3857)
-    Write-Host "  Reprojecting to Web Mercator..."
-    $cmd = "gdalwarp"
-    $args = @("-s_srs", "EPSG:3021", "-t_srs", "EPSG:3857", "-of", "VRT", "mosaic.vrt", "mosaic_3857.vrt")
-    if ($Verbose) { Write-Host "    Running: $cmd $($args -join ' ')" }
-    
-    & $cmd @args
-    if ($LASTEXITCODE -ne 0) {
-        throw "gdalwarp failed with exit code $LASTEXITCODE"
-    }
-    
-    # Command 3: Generate web tiles
-    Write-Host "  Generating web tiles (this may take a while)..."
-    $cmd = "gdal2tiles.py"
-    $args = @("--xyz", "--tiledriver=WEBP", "--webp-quality=85", "mosaic_3857.vrt", "tiles")
-    if ($Verbose) { Write-Host "    Running: $cmd $($args -join ' ')" }
-    
-    # Python script execution (may be 'gdal2tiles.py' or 'gdal2tiles')
-    py -3 -m osgeo_utils.samples.gdal2tiles @args
-    if ($LASTEXITCODE -ne 0) {
-        throw "gdal2tiles failed with exit code $LASTEXITCODE"
+    $commandIndex = 1
+    foreach ($command in $tileConfig.tileGenerationCommands) {
+        $resolvedCommand = $command
+        $resolvedCommand = $resolvedCommand.Replace("{{mapBuildDir}}", $mapBuildDir)
+        $resolvedCommand = $resolvedCommand.Replace("{{generatedTilesFolder}}", $generatedTilesFolder)
+
+        Write-Host "  Command $commandIndex/$($tileConfig.tileGenerationCommands.Count): $resolvedCommand"
+        if ($Verbose) { Write-Host "    Working directory: $mapBuildDir" }
+        
+        # Execute the command exactly as configured.
+        Invoke-Expression $resolvedCommand
+        if ($LASTEXITCODE -ne 0) {
+            throw "Command failed with exit code $LASTEXITCODE"
+        }
+        
+        $commandIndex++
     }
     
     Write-Host "[OK] GDAL processing complete"
@@ -139,20 +134,20 @@ finally {
     Pop-Location
 }
 
-# Copy tiles to docs/tiles/
-Write-Host "Step 3/3: Copying tiles to output directory..."
-$sourceTiles = Join-Path $mapBuildDir "tiles"
+# Stage tiles to build/tiles/
+Write-Host "Step 3/3: Staging tiles to build output directory..."
+$sourceTiles = Join-Path $mapBuildDir $generatedTilesFolder
 if (Test-Path $sourceTiles) {
-    # Remove existing tiles and copy new ones
-    if (Test-Path $mapTilesDir) {
-        Remove-Item -Path $mapTilesDir -Recurse -Force
+    # Remove existing staged tiles for this map and copy new ones
+    if (Test-Path $mapTilesBuildDir) {
+        Remove-Item -Path $mapTilesBuildDir -Recurse -Force
     }
-    Copy-Item -Path $sourceTiles -Destination $mapTilesDir -Recurse
-    Write-Host "[OK] Tiles copied to: $mapTilesDir"
+    Copy-Item -Path $sourceTiles -Destination $mapTilesBuildDir -Recurse
+    Write-Host "[OK] Tiles staged to: $mapTilesBuildDir"
 } else {
     Write-Host "[WARN] Tiles directory not found at: $sourceTiles"
 }
 
 Write-Host ""
 Write-Host "[OK] Map tile generation complete!"
-Write-Host "    Tiles location: $mapTilesDir"
+Write-Host "    Staged tiles location: $mapTilesBuildDir"

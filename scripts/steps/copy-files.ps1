@@ -53,6 +53,17 @@ if (Test-Path $generatedHtmlSource) {
     Write-Host "[WARN] build/places/ not found"
 }
 
+# Copy generated map tiles to docs/tiles/
+$generatedTilesSource = Join-Path $buildDir "tiles"
+$generatedTilesDest = Join-Path $targetDocs "tiles"
+
+if (Test-Path $generatedTilesSource) {
+    Copy-Item -Path $generatedTilesSource -Destination $generatedTilesDest -Recurse -Force
+    Write-Host "[OK] Copied generated tiles to docs/tiles/"
+} else {
+    Write-Host "[INFO] build/tiles/ not found (skip tiles copy)"
+}
+
 # Copy config.json to docs/
 $configSource = Join-Path $repoRoot "config.json"
 if (Test-Path $configSource) {
