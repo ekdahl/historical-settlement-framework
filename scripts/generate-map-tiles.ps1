@@ -117,8 +117,8 @@ try {
         Write-Host "  Command $commandIndex/$($tileConfig.tileGenerationCommands.Count): $resolvedCommand"
         if ($Verbose) { Write-Host "    Working directory: $mapBuildDir" }
         
-        # Execute the command exactly as configured.
-        Invoke-Expression $resolvedCommand
+        # Execute via cmd.exe so external command failures propagate as a non-zero exit code.
+        & cmd.exe /c $resolvedCommand
         if ($LASTEXITCODE -ne 0) {
             throw "Command failed with exit code $LASTEXITCODE"
         }
@@ -176,7 +176,9 @@ if (Test-Path $sourceTiles) {
     Copy-Item -Path $sourceTiles -Destination $mapTilesBuildDir -Recurse
     Write-Host "[OK] Tiles staged to: $mapTilesBuildDir"
 } else {
-    Write-Host "[WARN] Tiles directory not found at: $sourceTiles"
+    Write-Host "[ERROR] Tiles directory not found at: $sourceTiles" -ForegroundColor Red
+    Write-Host "[ERROR] Check the last tileGenerationCommands output path in tile-build.json" -ForegroundColor Red
+    exit 1
 }
 
 Write-Host ""
