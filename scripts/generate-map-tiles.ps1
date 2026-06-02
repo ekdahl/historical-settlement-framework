@@ -98,11 +98,37 @@ foreach ($source in $tileConfig.sources) {
     } else {
         try {
             if ($Verbose) { Write-Host "  [DL]   $fileName" }
-            (New-Object System.Net.WebClient).DownloadFile($source, $targetPath)
+
+            $isRemoteSource = $false
+            if ($source -match '^(https?|ftp)://') {
+                $isRemoteSource = $true
+            }
+
+            if ($isRemoteSource) {
+                (New-Object System.Net.WebClient).DownloadFile($source, $targetPath)
+            }
+            else {
+                if ($source -match '^file://') {
+                    $sourcePath = [System.Uri]::new($source).LocalPath
+                }
+                elseif ([System.IO.Path]::IsPathRooted($source)) {
+                    $sourcePath = $source
+                }
+                else {
+                    $sourcePath = Join-Path $mapDataDir $source
+                }
+
+                if (-not (Test-Path $sourcePath)) {
+                    throw "Local source file not found: $sourcePath"
+                }
+
+                Copy-Item -Path $sourcePath -Destination $targetPath -Force
+            }
+
             $downloadedCount++
         }
         catch {
-            Write-Host "[WARN] Failed to download $fileName`: $_"
+            Write-Host "[WARN] Failed to retrieve $fileName`: $_"
         }
     }
 }
