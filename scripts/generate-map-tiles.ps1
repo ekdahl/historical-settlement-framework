@@ -5,8 +5,8 @@
 # Requires: GDAL tools (gdalbuildvrt, gdalwarp, gdal2tiles.py)
 
 param(
+    [string]$MapName,
     [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)),
-    [string]$MapName = "ekonomiska_kartan",
     [switch]$Force,  # Force re-download even if files exist
     [switch]$Verbose
 )
@@ -18,8 +18,30 @@ $dataDir = Join-Path $repoRoot "data"
 $buildDir = Join-Path $repoRoot "build"
 $mapsDir = Join-Path $buildDir "maps"
 $tilesBuildDir = Join-Path $buildDir "tiles"
+$dataMapsDir = Join-Path $dataDir "maps"
 
-$mapDataDir = Join-Path (Join-Path $dataDir "maps") $MapName
+# Auto-detect MapName if not provided
+if (-not $MapName) {
+    $availableMaps = @(Get-ChildItem -Path $dataMapsDir -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name)
+    
+    if ($availableMaps.Count -eq 0) {
+        Write-Host "[ERROR] No maps found in: $dataMapsDir"
+        exit 1
+    }
+    elseif ($availableMaps.Count -eq 1) {
+        $MapName = $availableMaps[0]
+        Write-Host "No map specified. Using available map: $MapName"
+    }
+    else {
+        Write-Host "[ERROR] Multiple maps found. Please specify which one to use:"
+        foreach ($map in $availableMaps) {
+            Write-Host "  .\generate-map-tiles.ps1 $map"
+        }
+        exit 1
+    }
+}
+
+$mapDataDir = Join-Path $dataMapsDir $MapName
 $mapBuildDir = Join-Path $mapsDir $MapName
 $mapTilesBuildDir = Join-Path $tilesBuildDir $MapName
 
