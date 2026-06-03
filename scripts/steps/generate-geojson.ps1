@@ -53,7 +53,7 @@ foreach ($placeFolder in $placeFolders) {
                         }
                         properties = @{
                             id = $metadata.id
-                            name = $metadata.names[0]  # Use first name from array
+                            name = $metadata.name
                             type = $metadata.type
                             hasSign = $metadata.hasSign
                             hasText = Test-Path (Join-Path $placeFolder.FullName "text.md")
@@ -67,7 +67,7 @@ foreach ($placeFolder in $placeFolders) {
                 $placeCount++
                 
                 if ($Verbose) {
-                    Write-Host "  [OK] Processed: $($metadata.names[0]) ($($metadata.places.Count) location(s))"
+                    Write-Host "  [OK] Processed: $($metadata.name) ($($metadata.places.Count) location(s))"
                 }
             }
         }
