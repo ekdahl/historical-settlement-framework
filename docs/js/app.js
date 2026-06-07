@@ -275,6 +275,15 @@ async function startApp(config) {
 }).addTo(map);
   map.addControl(new L.Control.FullScreen());
 
+  map.on('contextmenu', (e) => {
+    const coords = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+    navigator.clipboard.writeText(coords);
+    L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`Copied:<br>${coords}`)
+        .openOn(map);
+  });
+
   return map;
 }
 
