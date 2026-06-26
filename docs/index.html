@@ -20,7 +20,7 @@
 		const media = window.matchMedia('(prefers-color-scheme: dark)');
 		function updateTheme() {
 			document.documentElement.setAttribute('data-bs-theme', media.matches ? 'dark' : 'light');
-  		}
+		}
 		updateTheme(); // initial
 		media.addEventListener('change', updateTheme);
 	</script>
@@ -35,10 +35,10 @@
 				<div class="modal-header">
 					<h1 class="modal-title fs-3" id="placeModalTitle">Info</h1>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      			</div>
+				</div>
 				<div class="modal-body" id="placeModalBody">Loading...</div>
 			</div>
-  		</div>
+		</div>
 	</div>
 
 	</main>
