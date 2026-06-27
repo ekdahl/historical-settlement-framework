@@ -53,6 +53,33 @@ if (Test-Path $generatedHtmlSource) {
     Write-Host "[WARN] build/places/ not found"
 }
 
+# Copy place image assets to docs/places/<place>/images/
+$placeDataRoot = Join-Path (Join-Path $repoRoot "data") "places"
+if (Test-Path $placeDataRoot) {
+    foreach ($placeFolder in Get-ChildItem -Path $placeDataRoot -Directory) {
+        $imagesSource = Join-Path $placeFolder.FullName "images"
+        if (Test-Path $imagesSource) {
+            $placeOutputDir = Join-Path $generatedHtmlDest $placeFolder.Name
+            $imagesDest = Join-Path $placeOutputDir "images"
+
+            if (-not (Test-Path $placeOutputDir)) {
+                New-Item -ItemType Directory -Path $placeOutputDir -Force | Out-Null
+            }
+            if (-not (Test-Path $imagesDest)) {
+                New-Item -ItemType Directory -Path $imagesDest -Force | Out-Null
+            }
+
+            Get-ChildItem -Path $imagesSource -File | ForEach-Object {
+                Copy-Item -Path $_.FullName -Destination $imagesDest -Force
+            }
+
+            Write-Host "[OK] Copied images for $($placeFolder.Name) to docs/places/$($placeFolder.Name)/images/"
+        }
+    }
+} else {
+    Write-Host "[INFO] data/places/ not found; no place images to copy"
+}
+
 # Copy generated map tiles to docs/tiles/
 $generatedTilesSource = Join-Path $buildDir "tiles"
 $generatedTilesDest = Join-Path $targetDocs "tiles"
